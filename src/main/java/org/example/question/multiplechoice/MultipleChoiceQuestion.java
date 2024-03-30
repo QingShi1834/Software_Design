@@ -19,8 +19,6 @@ import java.util.List;
         @JsonSubTypes.Type(value = MultipleChoiceQuestionNothing.class, name = "nothing"),
 })
 
-//@JacksonXmlRootElement(localName = "MultipleChoiceQuestion")
-//@JacksonXmlProperty(localName = "Header")
 @Data
 public class MultipleChoiceQuestion extends Question {
     private String scoreMode;
@@ -35,10 +33,6 @@ public class MultipleChoiceQuestion extends Question {
         this.setType(2);
     }
 
-    @Override
-    public int calculateQuestionScore(Object studentAnswer){
-        return 0;
-    }
     @Override
     public String toString() {
         return "MultipleChoiceQuestionMood{" +

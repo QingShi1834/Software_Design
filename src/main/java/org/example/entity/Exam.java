@@ -1,4 +1,5 @@
-package org.example.exam;
+package org.example.entity;
+
 
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlElementWrapper;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
@@ -12,7 +13,6 @@ import javax.xml.bind.annotation.XmlRootElement;
 import java.util.List;
 
 @Data
-//@XmlRootElement
 public class Exam {
     private int id;
     private String title;

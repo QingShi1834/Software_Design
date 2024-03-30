@@ -9,7 +9,6 @@ import org.example.scoreCalculator.ScoringStrategy;
 
 @JsonTypeInfo(
         use = JsonTypeInfo.Id.NAME,
-        include = JsonTypeInfo.As.PROPERTY,
         property = "type")
 @JsonSubTypes({
         @JsonSubTypes.Type(value = SingleChoiceQuestion.class, name = "1"),
@@ -27,18 +26,6 @@ public abstract class Question<T> {
     private ScoringStrategy scoringStrategy;
 
     public void initStrategy(){}
-
-    public int calculateQuestionScore(Integer studentAnswer){
-        return 0;
-    }
-    public int calculateQuestionScore(String studentAnswer){
-        return 0;
-    }
-
-    public int calculateQuestionScore(Object answer){
-        return 0;
-    }
-
 
     @Override
     public String toString() {

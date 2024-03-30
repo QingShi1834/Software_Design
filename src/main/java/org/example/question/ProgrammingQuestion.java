@@ -20,12 +20,6 @@ public class ProgrammingQuestion extends Question{
         setScoringStrategy(new ProgrammingScoringStrategy(getPoints()));
     }
 
-
-    @Override
-    public int calculateQuestionScore(String studentAnswer){
-        return points;
-    }
-
     @Override
     public String toString() {
         return "ProgrammingQuestion{" +
