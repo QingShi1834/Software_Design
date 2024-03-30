@@ -1,8 +1,10 @@
 package org.example.onlineJudge;
 
-import org.example.answer.Answer;
-import org.example.answer.AnswerItem;
-import org.example.exam.Exam;
+import org.example.entity.Answer;
+import org.example.entity.AnswerItem;
+import org.example.entity.Exam;
+import org.example.entity.ExamScore;
+import org.example.fileUtil.FileProcessor;
 import org.example.fileUtil.impl.CSVScoreWriter;
 import org.example.question.Question;
 
@@ -12,21 +14,36 @@ import java.util.List;
 import java.util.Map;
 
 public class OnlineJudge {
-    //Map<Integer, Exam> idToExamMap = readExam(examsPath);
-    ////        Map<Integer, Answer>
-    //        List<Answer> answers = readAnswer(answersPath);
     private List<Answer> answerList;
-    private Map<Integer, Exam> idToExamMap ;
+    private Map<Integer, Exam> idToExamMap;
 
     private List<ExamScore> examScoreList = new ArrayList<>();
 
-    public OnlineJudge(List<Answer> answers, Map<Integer,Exam> examMap) {
-        this.answerList = answers;
-        this.idToExamMap = examMap;
+    private FileProcessor fileProcessor;
+
+    private String examsPath;
+    private String answersPath;
+    private String outPath;
+    public OnlineJudge(String examsPath, String answersPath, String outPath) {
+        this.fileProcessor = new FileProcessor();
+        this.examsPath = examsPath;
+        this.answersPath = answersPath;
+        this.outPath = outPath;
     }
 
-    public void calculateExamScoreList(){
+    public void run() throws IOException {
+        init(examsPath,answersPath);
+        calculateExamScoreList();
+        saveScoreList(outPath);
+    }
+
+    public void init(String examsPath, String answersPath ) throws IOException {
+        this.answerList = fileProcessor.readAnswer(answersPath);
+        this.idToExamMap = fileProcessor.readExam(examsPath);
         initQuestionScoreStrategy();
+    }
+
+    public List<ExamScore> calculateExamScoreList(){
         // 使用 Lambda 表达式
         answerList.forEach(item -> {
             // 在这里对每个元素执行操作
@@ -47,14 +64,7 @@ public class OnlineJudge {
             ExamScore examScore = new ExamScore(item.getExamId(),item.getStudentId(),score);
             examScoreList.add(examScore);
         });
-    }
-
-    public void saveExamScoreList() throws IOException {
-        if (examScoreList.isEmpty()){
-            return;
-        }
-        CSVScoreWriter csvScoreWriter = new CSVScoreWriter(examScoreList);
-        csvScoreWriter.writeScore("src/test/resources/cases/"+"output.csv");
+        return examScoreList;
     }
 
     public int calculateExamScore(List<Question>questionList,List<AnswerItem> answers){
@@ -67,34 +77,15 @@ public class OnlineJudge {
                 continue;
             }
             System.out.println(question.toString());
-            int type = question.getType();
             String answer = answers.get(i).getAnswer();
 
-//            int type = question.getType();
-            totalScore += question.getScoringStrategy().calculateQuestionScore(convertTo(answer,type));
+            totalScore += question.getScoringStrategy().calculateQuestionScore(answer);
         }
         return totalScore;
     }
 
-    private Object convertTo(String answer,int type){
-        Object selfAnswer = null;
-        switch (type){
-            case 1://单选
-                selfAnswer = (int)answer.charAt(0) - 65;
-                break;
-            case 2://多选
-                List<Integer> list = new ArrayList<Integer>();
-                for (char c : answer.toCharArray()) {
-                    list.add((int) c - 65);
-                }
-                selfAnswer = list;
-                break;
-            case 3://编程题
-                selfAnswer = answer;
-                break;
-            default:break;
-        }
-        return selfAnswer;
+    public void saveScoreList(String outputPath) throws IOException {
+        fileProcessor.saveExamScoreList(outputPath,examScoreList);
     }
 
     private  void initQuestionScoreStrategy(){

@@ -20,14 +20,6 @@ public class SingleChoiceQuestion extends Question {
     }
 
     @Override
-    public int calculateQuestionScore(Integer studentAnswer) {
-        if(studentAnswer == answer)
-            return getPoints();
-        else
-            return 0;
-    }
-
-    @Override
     public String toString() {
         return "SingleChoiceQuestion{" +
                 "options=" + options +

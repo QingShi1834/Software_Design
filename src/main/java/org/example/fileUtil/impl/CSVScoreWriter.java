@@ -2,7 +2,7 @@ package org.example.fileUtil.impl;
 import com.fasterxml.jackson.dataformat.csv.CsvMapper;
 import com.fasterxml.jackson.dataformat.csv.CsvSchema;
 import org.example.fileUtil.ScoreWriter;
-import org.example.onlineJudge.ExamScore;
+import org.example.entity.ExamScore;
 
 import java.io.File;
 import java.io.IOException;

@@ -4,7 +4,7 @@ import org.example.fileUtil.impl.JsonExamReader;
 import org.example.fileUtil.impl.XmlExamReader;
 
 public class ExamReaderFactory {
-    public static ExamReader createExamReader(String fileExtension) {
+    public ExamReader createExamReader(String fileExtension) {
         switch (fileExtension) {
             case "json":
                 return new JsonExamReader();

@@ -2,6 +2,7 @@ package org.example.question.multiplechoice;
 
 import com.fasterxml.jackson.annotation.JsonAlias;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonTypeName;
 import lombok.Data;
 import org.example.scoreCalculator.impl.FixScoringStrategy;
 import org.example.scoreCalculator.impl.PartialScoringStrategy;
@@ -16,20 +17,11 @@ public class MultipleChoiceQuestionPartial extends MultipleChoiceQuestion{
         this.setType(2);
         this.setScoreMode("partial");
         this.setScoringStrategy(new PartialScoringStrategy(partialScore,getAnswer(),getPoints()));
-//        setMultipleChoiceScoringStrategy(new PartialMultipleChoiceScoringStrategy(partialScore));
     }
 
     public void initStrategy(){
         this.setScoringStrategy(new PartialScoringStrategy(getPartialScore(),getAnswer(),getPoints()));
     }
-
-//    @Override
-//    public int calculateQuestionScore(Object studentAnswer){
-//        if (!(studentAnswer instanceof List)) {
-//            throw new IllegalArgumentException("Invalid argument");
-//        }
-//        return getMultipleChoiceScoringStrategy().calculateQuestionScore(getAnswer(),(List<Integer>) studentAnswer,getPoints());
-//    }
 
     @Override
     public String toString() {

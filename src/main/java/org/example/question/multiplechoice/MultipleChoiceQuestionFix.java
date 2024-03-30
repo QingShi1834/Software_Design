@@ -1,7 +1,9 @@
 package org.example.question.multiplechoice;
 
+import com.fasterxml.jackson.annotation.JsonTypeName;
+import lombok.Data;
 import org.example.scoreCalculator.impl.FixScoringStrategy;
-
+@Data
 public class MultipleChoiceQuestionFix extends MultipleChoiceQuestion{
     private int fixScore;
 
@@ -20,13 +22,6 @@ public class MultipleChoiceQuestionFix extends MultipleChoiceQuestion{
     public void initStrategy(){
         this.setScoringStrategy(new FixScoringStrategy(getPoints(),fixScore,getAnswer()));
     }
-//    public int calculateQuestionScore(Object studentAnswer){
-//        if (!(studentAnswer instanceof List)) {
-//            throw new IllegalArgumentException("Invalid argument");
-//        }
-//
-//        return getMultipleChoiceScoringStrategy().calculateQuestionScore(getAnswer(),(List<Integer>)studentAnswer,getPoints());
-//    }
 
     @Override
     public String toString() {

@@ -2,6 +2,7 @@ package org.example.scoreCalculator.impl;
 
 import org.example.scoreCalculator.ScoringStrategy;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class NothingScoringStrategy implements ScoringStrategy {
@@ -12,12 +13,17 @@ public class NothingScoringStrategy implements ScoringStrategy {
         this.points = points;
     }
     public int calculateQuestionScore(Object self_writtenAnswer){
-        if (!(self_writtenAnswer instanceof List)) {
-            throw new IllegalArgumentException("Invalid argument");
+        if (!(self_writtenAnswer instanceof String)) {
+            System.out.println(self_writtenAnswer.toString());
+            throw new IllegalArgumentException("Invalid argument! The Nothing calculateStrategy need String!");
         }
+        String selfAnswer = (String)self_writtenAnswer;
 
-        List<Integer> selfAnswer = (List<Integer>)self_writtenAnswer;
-        if (correctAnswer.equals(selfAnswer)) {
+        List<Integer> answerList = new ArrayList<Integer>();
+        for (char c : selfAnswer.toCharArray()) {
+            answerList.add((int) c - 65);
+        }
+        if (correctAnswer.equals(answerList)) {
             return points;
         }
         return 0;

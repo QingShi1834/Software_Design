@@ -1,6 +1,6 @@
 package org.example.fileUtil;
 
-import org.example.exam.Exam;
+import org.example.entity.Exam;
 
 import java.io.IOException;
 
