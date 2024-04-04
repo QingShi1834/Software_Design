@@ -1,14 +1,14 @@
 package org.example.question;
 
 import lombok.Data;
-import org.example.scoreCalculator.impl.FixScoringStrategy;
+import org.example.entity.SampleItem;
 import org.example.scoreCalculator.impl.ProgrammingScoringStrategy;
 
 import java.util.List;
-import java.util.Map;
+
 @Data
 public class ProgrammingQuestion extends Question{
-    private List<Map<String, String>> samples;
+    private List<SampleItem> samples;
     private int timeLimit;
     private int points;
 
@@ -17,7 +17,7 @@ public class ProgrammingQuestion extends Question{
     }
 
     public void initStrategy(){
-        setScoringStrategy(new ProgrammingScoringStrategy(getPoints()));
+        setScoringStrategy(new ProgrammingScoringStrategy(getPoints(),getSamples(),getTimeLimit()));
     }
 
     @Override

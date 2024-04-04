@@ -23,7 +23,6 @@ public class Main {
         String answersPath = casePath + System.getProperty("file.separator") + "answers";
         // 输出文件路径
         String output = args[1];
-        // TODO:在下面调用你实现的功能
         // 将提交的回答放入oj判断，拿到成绩表
         OnlineJudge onlineJudge = new OnlineJudge(examsPath, answersPath, output);
         onlineJudge.run();

@@ -7,11 +7,13 @@ import org.example.entity.ExamScore;
 import org.example.fileUtil.FileProcessor;
 import org.example.fileUtil.impl.CSVScoreWriter;
 import org.example.question.Question;
+import org.example.threadPool.ThreadPool;
 
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.Future;
 
 public class OnlineJudge {
     private List<Answer> answerList;
@@ -20,6 +22,9 @@ public class OnlineJudge {
     private List<ExamScore> examScoreList = new ArrayList<>();
 
     private FileProcessor fileProcessor;
+
+    private // 创建一个线程池
+    ThreadPool threadPool = new ThreadPool(5);
 
     private String examsPath;
     private String answersPath;
@@ -46,6 +51,7 @@ public class OnlineJudge {
     public List<ExamScore> calculateExamScoreList(){
         // 使用 Lambda 表达式
         answerList.forEach(item -> {
+            System.out.println(item.toString());
             // 在这里对每个元素执行操作
             Exam exam = idToExamMap.get(item.getExamId());
             //判断是不是超过提交时间或者提前教
@@ -64,22 +70,31 @@ public class OnlineJudge {
             ExamScore examScore = new ExamScore(item.getExamId(),item.getStudentId(),score);
             examScoreList.add(examScore);
         });
+        threadPool.shutdown();
         return examScoreList;
     }
 
     public int calculateExamScore(List<Question>questionList,List<AnswerItem> answers){
         int totalScore = 0;
-        System.out.println(questionList.size()+"//"+answers.size());
+        int gradeOfPerQuestion = 0;
         for (int i = 0; i < questionList.size(); i++) {
             Question question = questionList.get(i);
-            if (question.getType() == 3){
-                totalScore += question.getPoints();
-                continue;
-            }
-            System.out.println(question.toString());
             String answer = answers.get(i).getAnswer();
 
-            totalScore += question.getScoringStrategy().calculateQuestionScore(answer);
+            // 创建一个任务并提交给线程池
+            Future<Integer> future = threadPool.submit(() -> {
+                // System.out.println("Current thread: " + Thread.currentThread().getName());
+                return question.getScoringStrategy().calculateQuestionScore(answer);
+            });
+
+            // 获取任务的结果，也就是分数
+            try {
+                gradeOfPerQuestion = future.get();
+            } catch (Exception e) {
+                gradeOfPerQuestion = 0;
+                e.printStackTrace();
+            }
+            totalScore += gradeOfPerQuestion;
         }
         return totalScore;
     }

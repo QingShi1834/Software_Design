@@ -21,8 +21,9 @@ public class CSVScoreWriter implements ScoreWriter {
 
         // 创建 CsvSchema 对象
         CsvSchema schema = mapper.schemaFor(ExamScore.class).withHeader();
-
+//        System.out.println("正在写入csv文件： " + filePath);
         // 写入 CSV 文件
         mapper.writer(schema).writeValue(new File(filePath), examScoreList);
+
     }
 }

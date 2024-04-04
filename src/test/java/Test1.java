@@ -23,7 +23,9 @@ public class Test1 {
     @Test
     public void test() throws IOException {
         String realOutput = resourcePath + System.getProperty("file.separator") + "output.csv";
+        System.out.println(realOutput);
         String expected = resourcePath + System.getProperty("file.separator") + "output" + System.getProperty("file.separator") + "expected.csv";
+        System.out.println(expected);
         String[] args = new String[]{
                 resourcePath,
                 realOutput
