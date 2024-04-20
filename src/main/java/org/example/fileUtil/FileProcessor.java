@@ -37,7 +37,7 @@ public class FileProcessor {
                     if (fileName.toLowerCase().endsWith(".json")) {
                         // 读取 JSON 文件
                         // TODO: 实现读取 JSON 文件的逻辑
-                        System.out.println("Reading JSON file: " + fileName);
+//                        System.out.println("Reading JSON file: " + fileName);
 
                         // 使用 ExamReaderFactory 创建相应的 ExamReader
                         ExamReader reader = examReaderFactory.createExamReader("json");
@@ -49,7 +49,7 @@ public class FileProcessor {
                     } else if (fileName.toLowerCase().endsWith(".xml")) {
                         // 读取 XML 文件
                         // TODO: 实现读取 XML 文件的逻辑
-                        System.out.println("Reading XML file: " + fileName);
+//                        System.out.println("Reading XML file: " + fileName);
                         ExamReader reader = examReaderFactory.createExamReader("xml");
                         // 使用 ExamReader 读取文件
                         Exam exam = reader.readExam(file.toString());

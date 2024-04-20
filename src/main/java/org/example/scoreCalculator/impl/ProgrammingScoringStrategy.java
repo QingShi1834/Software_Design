@@ -1,13 +1,11 @@
 package org.example.scoreCalculator.impl;
 
-import org.example.codeHandler.CodeHandlerAdapter;
 import org.example.codeHandler.CodeHandlerFactory;
-import org.example.codeHandler.impl.CompiledLanguageAdapter;
+import org.example.codeHandler.impl.CompilationProcessor;
 import org.example.codeHandler.impl.JavaHandlerFactory;
 import org.example.entity.SampleItem;
 import org.example.scoreCalculator.ScoringStrategy;
 
-import java.io.IOException;
 import java.util.List;
 
 public class ProgrammingScoringStrategy implements ScoringStrategy {
@@ -16,7 +14,7 @@ public class ProgrammingScoringStrategy implements ScoringStrategy {
     private int timeLimit;
 
     CodeHandlerFactory codeHandlerFactory;
-    CodeHandlerAdapter codeHandlerAdapter;
+//    CodeHandlerAdapter codeHandlerAdapter;
     public ProgrammingScoringStrategy(int points,List<SampleItem> samples, int timeLimit){
         this.points = points;
         this.samples = samples;
@@ -34,8 +32,9 @@ public class ProgrammingScoringStrategy implements ScoringStrategy {
         switch (getFileExtension((String)self_writtenAnswer)){
             case "java":
                 codeHandlerFactory = new JavaHandlerFactory();
-                codeHandlerAdapter = new CompiledLanguageAdapter(codeHandlerFactory.createCompiler(), codeHandlerFactory.createExecutor());
-                return codeHandlerAdapter.handleCode(answer_path,points,samples,timeLimit);
+//                codeHandlerAdapter = new CompiledLanguageAdapter(codeHandlerFactory.createCompiler(), codeHandlerFactory.createExecutor());
+                CompilationProcessor processor = new CompilationProcessor(codeHandlerFactory);
+                return processor.handleCode(answer_path,points,samples,timeLimit);
 //                break;
             default:break;
         }

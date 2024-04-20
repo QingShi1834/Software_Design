@@ -23,7 +23,7 @@ class WorkerThread extends Thread {
                         return;
                     }
                 }
-                task = taskQueue.poll();
+                task = taskQueue.poll();//从队列中取出并移除队首的元素
             }
             try {
                 task.run(); // Execute task

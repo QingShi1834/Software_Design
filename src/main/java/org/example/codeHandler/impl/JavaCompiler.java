@@ -14,7 +14,7 @@ public class JavaCompiler implements Compiler {
 
     @Override
     public boolean compile(String filePath) {
-        System.out.println("正在编译.."  + filePath);
+//        System.out.println("正在编译.."  + filePath);
         try {
             // 构建编译命令
             ProcessBuilder processBuilder = new ProcessBuilder("javac", "-d", compileDirectory, filePath);
@@ -25,10 +25,10 @@ public class JavaCompiler implements Compiler {
 
             int exitCode = process.waitFor();
             if ( exitCode == 0){
-                System.out.println("编译成功");
+//                System.out.println("编译成功");
                 return true;
             }
-            System.out.println("编译结果exitCode: " + exitCode);
+//            System.out.println("编译结果exitCode: " + exitCode);
             // 返回编译结果
             return false;
         } catch (IOException | InterruptedException e) {

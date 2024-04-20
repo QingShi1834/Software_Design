@@ -1,16 +1,21 @@
 package org.example.threadPool;
 
-import java.util.LinkedList;
-import java.util.Queue;
-import java.util.concurrent.Callable;
-import java.util.concurrent.Future;
-import java.util.concurrent.FutureTask;
+import java.util.*;
+import java.util.concurrent.*;
 
 public class ThreadPool {
+    private static final int threadNum = 5;
+
+    private static final ThreadPool instance = new ThreadPool(threadNum);
     private final WorkerThread[] threads;
     private final Queue<Runnable> taskQueue;
 
-    public ThreadPool(int threadCount) {
+    //对外提供静态方法获取该对象
+    public static ThreadPool getInstance() {
+        return instance;
+    }
+
+    private ThreadPool(int threadCount) {
         threads = new WorkerThread[threadCount];
         taskQueue = new LinkedList<>();
 
@@ -27,6 +32,35 @@ public class ThreadPool {
             taskQueue.notify();
         }
         return futureTask;
+    }
+
+    public <T> List<Future<T>> invokeAll(Collection<? extends Callable<T>> tasks)
+            throws InterruptedException {
+        if (tasks == null)
+            throw new NullPointerException();
+        ArrayList<Future<T>> futures = new ArrayList<>(tasks.size());
+        boolean done = false;
+        try {
+            for (Callable<T> t : tasks) {
+                Future<T> f = submit(t);
+                futures.add(f);
+            }
+            for (int i = 0, size = futures.size(); i < size; i++) {
+                Future<T> f = futures.get(i);
+                if (!f.isDone()) {
+                    try {
+                        f.get();
+                    } catch (CancellationException | ExecutionException ignore) {
+                    }
+                }
+            }
+            done = true;
+            return futures;
+        } finally {
+            if (!done)
+                for (int i = 0, size = futures.size(); i < size; i++)
+                    futures.get(i).cancel(true);
+        }
     }
 
     public void shutdown() {

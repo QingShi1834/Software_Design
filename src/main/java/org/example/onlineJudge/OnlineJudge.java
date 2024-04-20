@@ -23,9 +23,6 @@ public class OnlineJudge {
 
     private FileProcessor fileProcessor;
 
-    private // 创建一个线程池
-    ThreadPool threadPool = new ThreadPool(5);
-
     private String examsPath;
     private String answersPath;
     private String outPath;
@@ -51,7 +48,7 @@ public class OnlineJudge {
     public List<ExamScore> calculateExamScoreList(){
         // 使用 Lambda 表达式
         answerList.forEach(item -> {
-            System.out.println(item.toString());
+//            System.out.println(item.toString());
             // 在这里对每个元素执行操作
             Exam exam = idToExamMap.get(item.getExamId());
             //判断是不是超过提交时间或者提前教
@@ -70,7 +67,7 @@ public class OnlineJudge {
             ExamScore examScore = new ExamScore(item.getExamId(),item.getStudentId(),score);
             examScoreList.add(examScore);
         });
-        threadPool.shutdown();
+
         return examScoreList;
     }
 
@@ -81,19 +78,7 @@ public class OnlineJudge {
             Question question = questionList.get(i);
             String answer = answers.get(i).getAnswer();
 
-            // 创建一个任务并提交给线程池
-            Future<Integer> future = threadPool.submit(() -> {
-                // System.out.println("Current thread: " + Thread.currentThread().getName());
-                return question.getScoringStrategy().calculateQuestionScore(answer);
-            });
-
-            // 获取任务的结果，也就是分数
-            try {
-                gradeOfPerQuestion = future.get();
-            } catch (Exception e) {
-                gradeOfPerQuestion = 0;
-                e.printStackTrace();
-            }
+            gradeOfPerQuestion = question.getScoringStrategy().calculateQuestionScore(answer);
             totalScore += gradeOfPerQuestion;
         }
         return totalScore;

@@ -14,4 +14,9 @@ public class JavaHandlerFactory implements CodeHandlerFactory {
     public Executor createExecutor() {
         return new JavaExecutor();
     }
+
+    @Override
+    public boolean isCompiledLanguage() {
+        return true;
+    }
 }
