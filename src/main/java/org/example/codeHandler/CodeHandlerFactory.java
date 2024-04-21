@@ -1,7 +1,11 @@
 package org.example.codeHandler;
 
+import org.example.entity.SampleItem;
+
+import java.util.List;
+
 public interface CodeHandlerFactory {
     Compiler createCompiler();
     Executor createExecutor();
-    boolean isCompiledLanguage();
+    int handleCode(String filePath, int point, List<SampleItem> sampleList, int timeLimit);
 }

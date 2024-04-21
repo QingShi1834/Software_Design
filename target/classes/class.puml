@@ -59,10 +59,6 @@ class ProgrammingScoringStrategy implements ScoringStrategy {
 }
 
 
-interface CodeHandlerAdapter {
-    + {method} handleCode(String filePath, int points, List<SampleItem> samples, int timeLimit): int
-}
-
 
 class PartialScoringStrategy implements ScoringStrategy {
     - partialScore: List<Integer>
@@ -240,9 +236,8 @@ interface Compiler {
 interface CodeHandlerFactory {
     + createCompiler(): Compiler
     + createExecutor(): Executor
-    + isCompiledLanguage(): boolean
+    + handleCode(filePath: String, point: int, sampleList: List<SampleItem>, timeLimit: int): int
 }
-
 
 
 class JavaCompiler implements Compiler{
@@ -260,15 +255,9 @@ class JavaExecutor implements Executor{
 class JavaHandlerFactory implements CodeHandlerFactory{
     + createCompiler(): Compiler
     + createExecutor(): Executor
-}
-
-class FlexibleCodeProcessor {
-    - compiler: Compiler
-    - executor: Executor
-
-    + FlexibleCodeProcessor(codeHandlerFactory: CodeHandlerFactory)
     + handleCode(filePath: String, point: int, sampleList: List<SampleItem>, timeLimit: int): int
 }
+
 
 OnlineJudge --> Answer
 OnlineJudge --> Exam
@@ -283,11 +272,8 @@ FileProcessor --> AnswerReader
 Question --> ScoringStrategy
 
 ProgrammingQuestion "1" --> "n" SampleItem : contains
-ProgrammingScoringStrategy --> CodeHandlerAdapter
+ProgrammingScoringStrategy --> CodeHandlerFactory
 
-
-
-CodeHandlerAdapter <|.. CompiledLanguageAdapter
 
 
 ThreadPool "1" --> "*" WorkerThread
@@ -301,18 +287,13 @@ ExamReaderFactory --> ExamReader
 
 CSVScoreWriter --> ExamScore
 
-JsonAnswerReader --> AnswerReader
 JsonAnswerReader --> Answer
 
 JsonExamReader --> Exam
 
-Executor <|.. CodeHandlerFactory
-Compiler <|.. CodeHandlerFactory
+Executor <-- CodeHandlerFactory
+Compiler <-- CodeHandlerFactory
 
-FlexibleCodeProcessor --> Compiler
-FlexibleCodeProcessor --> Executor
-FlexibleCodeProcessor ..> CodeHandlerFactory
 
-InterpretedLanguageAdapter ..|> CodeHandlerAdapter
 
 @enduml

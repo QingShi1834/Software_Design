@@ -1,0 +1,40 @@
+@startuml
+'https://plantuml.com/sequence-diagram
+
+'autonumber
+'
+'Alice -> Bob: Authentication Request
+'Bob --> Alice: Authentication Response
+'
+'Alice -> Bob: Another authentication Request
+'Alice <-- Bob: another authentication Response
+
+participant "ProgrammingScoringStrategy" as ProgrammingScoringStrategy
+participant "JavaHandlerFactory" as JavaHandlerFactory
+participant "JavaCompiler" as JavaCompiler
+participant "JavaExecutor" as JavaExecutor
+participant "ThreadPool" as ThreadPool
+activate "ProgrammingScoringStrategy"
+activate JavaHandlerFactory
+ProgrammingScoringStrategy -> JavaHandlerFactory: handleCode(filePath, point, sampleList, timeLimit)
+JavaHandlerFactory -> JavaCompiler: createCompiler()
+activate JavaCompiler
+JavaHandlerFactory -> JavaExecutor: createExecutor()
+activate JavaExecutor
+JavaHandlerFactory -> ThreadPool: getInstance()
+activate ThreadPool
+JavaHandlerFactory -> ThreadPool: submit(compileTask)
+deactivate JavaCompiler
+ThreadPool -> JavaCompiler: compile(fileAbsolutePath)
+activate JavaCompiler
+ThreadPool --> JavaHandlerFactory: compileResult
+JavaHandlerFactory -> ThreadPool: invokeAll(executeTasks)
+ThreadPool -> JavaExecutor: execute(absoluteFilePath, sampleItem.getProgramArgs())
+'deactivate ThreadPool
+deactivate JavaCompiler
+JavaHandlerFactory --> ProgrammingScoringStrategy: result
+deactivate JavaExecutor
+
+ThreadPool --> JavaHandlerFactory: resultList
+deactivate ThreadPool
+@enduml

@@ -1,0 +1,37 @@
+@startuml
+'https://plantuml.com/state-diagram
+
+scale 350 width
+[*] --> OnlineJudgeIdle
+
+state OnlineJudgeIdle {
+    [*] --> Idle
+    Idle --> Processing : handleCode() received
+    Processing --> Idle : Processing complete
+}
+
+state JavaHandlerFactory {
+    [*] --> Idle
+    Idle --> Compiling : createCompiler() invoked
+    Compiling --> Idle : Compilation complete
+}
+
+state ThreadPool {
+    [*] --> Idle
+    Idle --> Executing : submit() called
+    Executing --> Idle : Task execution complete
+}
+
+state JavaExecutor {
+    [*] --> Idle
+    Idle --> Executing : execute() called
+    Executing --> Idle : Execution complete
+}
+
+OnlineJudgeIdle --> JavaHandlerFactory : handleCode(filePath, point, sampleList, timeLimit)
+JavaHandlerFactory --> ThreadPool : createCompiler()
+ThreadPool --> JavaHandlerFactory : compileResult
+JavaHandlerFactory --> ThreadPool : submit(compileTask)
+ThreadPool --> JavaExecutor : execute(absoluteFilePath, sampleItem.getProgramArgs())
+
+@enduml

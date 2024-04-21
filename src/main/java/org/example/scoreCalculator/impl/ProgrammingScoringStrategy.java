@@ -1,7 +1,6 @@
 package org.example.scoreCalculator.impl;
 
 import org.example.codeHandler.CodeHandlerFactory;
-import org.example.codeHandler.impl.CompilationProcessor;
 import org.example.codeHandler.impl.JavaHandlerFactory;
 import org.example.entity.SampleItem;
 import org.example.scoreCalculator.ScoringStrategy;
@@ -32,13 +31,9 @@ public class ProgrammingScoringStrategy implements ScoringStrategy {
         switch (getFileExtension((String)self_writtenAnswer)){
             case "java":
                 codeHandlerFactory = new JavaHandlerFactory();
-//                codeHandlerAdapter = new CompiledLanguageAdapter(codeHandlerFactory.createCompiler(), codeHandlerFactory.createExecutor());
-                CompilationProcessor processor = new CompilationProcessor(codeHandlerFactory);
-                return processor.handleCode(answer_path,points,samples,timeLimit);
-//                break;
+                return codeHandlerFactory.handleCode(answer_path,points,samples,timeLimit);
             default:break;
         }
-
 
         return points;
     }

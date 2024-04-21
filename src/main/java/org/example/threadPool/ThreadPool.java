@@ -10,7 +10,7 @@ public class ThreadPool {
     private final WorkerThread[] threads;
     private final Queue<Runnable> taskQueue;
 
-    //对外提供静态方法获取该对象
+    // 对外提供静态方法获取该对象
     public static ThreadPool getInstance() {
         return instance;
     }

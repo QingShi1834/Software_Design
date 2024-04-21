@@ -1,0 +1,299 @@
+@startuml
+
+class ThreadPool {
+    - threads: WorkerThread[]
+    - taskQueue: Queue<Runnable>
+    + {method} ThreadPool(int threadCount)
+    + {method} submit(Callable<T> task): Future<T>
+    + {method} shutdown()
+}
+
+class WorkerThread extends Thread {
+    - taskQueue: Queue<Runnable>
+    - running: boolean
+    + {method} WorkerThread(Queue<Runnable> taskQueue)
+    + {method} run()
+    + {method} shutdown()
+}
+
+
+class OnlineJudge {
+    - answerList: List<Answer>
+    - idToExamMap: Map<Integer, Exam>
+    - examScoreList: List<ExamScore>
+    - fileProcessor: FileProcessor
+    - threadPool: ThreadPool
+    - examsPath: String
+    - answersPath: String
+    - outPath: String
+    + OnlineJudge(String, String, String)
+    + run(): void
+    + init(String, String): void
+    + calculateExamScoreList(): List<ExamScore>
+    + calculateExamScore(List<Question>, List<AnswerItem>): int
+    + saveScoreList(String): void
+    - initQuestionScoreStrategy(): void
+}
+
+interface ScoringStrategy {
+    + {method} calculateQuestionScore(Object self_writtenAnswer): int
+}
+
+
+class SingleChoiceScoringStrategy implements ScoringStrategy {
+    - answer: int
+    - points: int
+    + {method} SingleChoiceScoringStrategy(int answer, int points)
+    + {method} calculateQuestionScore(Object self_writtenAnswer): int
+}
+
+class ProgrammingScoringStrategy implements ScoringStrategy {
+    - points: int
+    - samples: List<SampleItem>
+    - timeLimit: int
+    - codeHandlerFactory: CodeHandlerFactory
+    - codeHandlerAdapter: CodeHandlerAdapter
+    + {method} ProgrammingScoringStrategy(int points, List<SampleItem> samples, int timeLimit)
+    + {method} calculateQuestionScore(Object self_writtenAnswer): int
+    - {method} getFileExtension(String filePath): String
+}
+
+
+
+class PartialScoringStrategy implements ScoringStrategy {
+    - partialScore: List<Integer>
+    - correctAnswer: List<Integer>
+    - points: int
+    + {method} PartialScoringStrategy(List<Integer> partialScore, List<Integer> correctAnswer, int points)
+    + {method} calculateQuestionScore(Object self_writtenAnswer): int
+}
+
+class NothingScoringStrategy implements ScoringStrategy {
+    - correctAnswer: List<Integer>
+    - points: int
+    + {method} NothingScoringStrategy(List<Integer> correctAnswer, int points)
+    + {method} calculateQuestionScore(Object self_writtenAnswer): int
+}
+
+class FixScoringStrategy implements ScoringStrategy {
+    - fixScore: int
+    - correctAnswer: List<Integer>
+    - points: int
+    + {method} FixScoringStrategy(int points, int fixScore, List<Integer> correctAnswer)
+    + {method} calculateQuestionScore(Object self_writtenAnswer): int
+}
+
+class Question<T> {
+    - id: int
+    - type: int
+    - question: String
+    - points: int
+    - scoringStrategy: ScoringStrategy
+    + {abstract} initStrategy(): void
+    + {abstract} toString(): String
+}
+
+class ProgrammingQuestion extends Question{
+    - samples: List<SampleItem>
+    - timeLimit: int
+    - points: int
+    + {method} ProgrammingQuestion()
+    + {method} initStrategy(): void
+    + {method} toString(): String
+}
+
+class SingleChoiceQuestion extends Question{
+    - options: List<String>
+    - answer: int
+    + {method} SingleChoiceQuestion()
+    + {method} initStrategy(): void
+    + {method} toString(): String
+}
+
+class MultipleChoiceQuestion extends Question{
+    - scoreMode: String
+    - options: List<String>
+    - answer: List<Integer>
+    + {method} MultipleChoiceQuestion()
+    + {method} toString(): String
+}
+
+class MultipleChoiceQuestionFix extends MultipleChoiceQuestion{
+    - fixScore: int
+    + {method} MultipleChoiceQuestionFix()
+    + {method} initStrategy(): void
+    + {method} toString(): String
+}
+
+class MultipleChoiceQuestionNothing extends MultipleChoiceQuestion{
+    + {method} MultipleChoiceQuestionNothing()
+    + {method} initStrategy(): void
+    + {method} toString(): String
+}
+
+class MultipleChoiceQuestionPartial extends MultipleChoiceQuestion{
+    - partialScore: List<Integer>
+    + {method} MultipleChoiceQuestionPartial()
+    + {method} initStrategy(): void
+    + {method} toString(): String
+}
+
+class Answer {
+    - examId: int
+    - studentId: int
+    - submitTime: long
+    - answers: List<AnswerItem>
+    + toString(): String
+}
+
+class AnswerItem {
+    - id: int
+    - answer: String
+}
+
+class Exam {
+    - id: int
+    - title: String
+    - startTime: long
+    - endTime: long
+    - questions: List<Question>
+    + toString(): String
+}
+
+class ExamScore {
+    - examId: int
+    - stuId: int
+    - score: int
+    + ExamScore(int examId, int stuId, int score)
+    + toString(): String
+}
+
+class SampleItem {
+    - input: String
+    - output: String
+    + getProgramArgs(): String[]
+    + toString(): String
+}
+
+interface ScoreWriter {
+    + writeScore(filePath: String) throws IOException
+}
+
+interface ExamReader {
+    + readExam(filePath: String): Exam throws IOException
+}
+
+interface AnswerReader {
+    + readAnswer(filePath: String): Answer throws IOException
+    + readAnswer(jsonFile: File): Answer throws IOException
+}
+
+class FileProcessor {
+    - examReaderFactory: ExamReaderFactory
+    - scoreWriter: ScoreWriter
+    - answerReader: AnswerReader
+
+    + readExam(examsPath: String): Map<Integer, Exam> throws IOException
+    + saveExamScoreList(outputPath: String, scoreList: List<ExamScore>) throws IOException
+    + readAnswer(answersPath: String): List<Answer> throws IOException
+}
+
+class ExamReaderFactory {
+    + createExamReader(fileExtension: String): ExamReader
+}
+
+class CSVScoreWriter implements ScoreWriter{
+    - examScoreList: List<ExamScore>
+
+    + CSVScoreWriter(examScoreList: List<ExamScore>)
+    + writeScore(filePath: String) throws IOException
+}
+
+class JsonAnswerReader implements AnswerReader{
+    + readAnswer(filePath: String): Answer throws IOException
+    + readAnswer(jsonFile: File): Answer throws IOException
+}
+
+class JsonExamReader implements ExamReader{
+    + readExam(filePath: String): Exam throws IOException
+    + readExamByJson(json: String): Exam throws IOException
+}
+
+class XmlExamReader implements ExamReader{
+    + readExam(filePath: String): Exam
+    + readExamByJson(json: String): Exam throws IOException
+}
+
+interface Executor {
+    + execute(compiledFilePath: String, args: String[]): String
+}
+
+interface Compiler {
+    + compile(filePath: String): boolean
+    + getCompileDirectory(): String
+}
+
+interface CodeHandlerFactory {
+    + createCompiler(): Compiler
+    + createExecutor(): Executor
+    + handleCode(filePath: String, point: int, sampleList: List<SampleItem>, timeLimit: int): int
+}
+
+
+class JavaCompiler implements Compiler{
+    - compileDirectory: String
+
+    + JavaCompiler()
+    + getCompileDirectory(): String
+    + compile(filePath: String): boolean
+}
+
+class JavaExecutor implements Executor{
+    + execute(compiledFilePath: String, args: String[]): String
+}
+
+class JavaHandlerFactory implements CodeHandlerFactory{
+    + createCompiler(): Compiler
+    + createExecutor(): Executor
+    + handleCode(filePath: String, point: int, sampleList: List<SampleItem>, timeLimit: int): int
+}
+
+
+OnlineJudge --> Answer
+OnlineJudge --> Exam
+OnlineJudge --> ExamScore
+OnlineJudge --> FileProcessor
+OnlineJudge --> ThreadPool
+
+FileProcessor --> ExamReaderFactory
+FileProcessor --> ScoreWriter
+FileProcessor --> AnswerReader
+
+Question --> ScoringStrategy
+
+ProgrammingQuestion "1" --> "n" SampleItem : contains
+ProgrammingScoringStrategy --> CodeHandlerFactory
+
+
+
+ThreadPool "1" --> "*" WorkerThread
+
+Answer --> AnswerItem
+
+Exam --> Question
+
+
+ExamReaderFactory --> ExamReader
+
+CSVScoreWriter --> ExamScore
+
+JsonAnswerReader --> Answer
+
+JsonExamReader --> Exam
+
+Executor <-- CodeHandlerFactory
+Compiler <-- CodeHandlerFactory
+
+
+
+@enduml
