@@ -61,8 +61,9 @@ public class JavaExecutor implements Executor {
             // 返回编译结果
             return re.toString();
         } catch (IOException | InterruptedException e) {
-            e.printStackTrace();
-            throw new RuntimeException("Execution failed");
+//            e.printStackTrace();
+//            throw new RuntimeException("Execution failed");
+            return "";
         }
     }
 

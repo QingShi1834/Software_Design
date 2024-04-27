@@ -53,11 +53,15 @@ public class JavaHandlerFactory implements CodeHandlerFactory {
             // 等待编译任务完成
             if (compileFuture.get()) {
                 // 执行任务并获取结果
-                List<Future<String>> futures = threadPool.invokeAll(executeTasks);
+                List<Future<String>> futures = threadPool.invokeAll(executeTasks,timeLimit);
 
                 int len = futures.size();
                 for (int i = 0; i < len; i++) {
-                    if (! futures.get(i).get().equals(sampleList.get(i).getOutput())){
+                    Future<String> future = futures.get(i);
+                    if (future.isCancelled()){
+                        return 0;
+                    }
+                    if (! future.get().equals(sampleList.get(i).getOutput())){
                         return 0;
                     }
                 }

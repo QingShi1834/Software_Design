@@ -34,7 +34,7 @@ public class ThreadPool {
         return futureTask;
     }
 
-    public <T> List<Future<T>> invokeAll(Collection<? extends Callable<T>> tasks)
+    public <T> List<Future<T>> invokeAll(Collection<? extends Callable<T>> tasks, int timeout)
             throws InterruptedException {
         if (tasks == null)
             throw new NullPointerException();
@@ -49,8 +49,11 @@ public class ThreadPool {
                 Future<T> f = futures.get(i);
                 if (!f.isDone()) {
                     try {
-                        f.get();
+                        f.get(timeout, TimeUnit.MILLISECONDS);
                     } catch (CancellationException | ExecutionException ignore) {
+                    } catch (TimeoutException e) {
+//                        throw new RuntimeException(e);
+                        f.cancel(true);
                     }
                 }
             }
@@ -69,18 +72,4 @@ public class ThreadPool {
         }
     }
 
-//    public static void main(String[] args) {
-//        ThreadPool threadPool = new ThreadPool(5);
-//
-//        // Submit tasks
-//        for (int i = 0; i < 10; i++) {
-//            final int taskId = i;
-//            threadPool.submit(() -> {
-//                System.out.println("Task " + taskId + " is running on thread " + Thread.currentThread().getName());
-//            });
-//        }
-//
-//        // Shutdown pool after tasks are completed
-//        threadPool.shutdown();
-//    }
 }
