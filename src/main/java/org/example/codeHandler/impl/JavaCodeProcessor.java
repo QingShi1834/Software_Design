@@ -1,14 +1,14 @@
 package org.example.codeHandler.impl;
 
-import org.example.codeHandler.Compiler;
+import org.example.codeHandler.Preprocessor;
 import org.example.codeHandler.Executor;
 import org.example.codeHandler.ProcessorTemplate;
 
 public class JavaCodeProcessor extends ProcessorTemplate {
 
     @Override
-    protected Compiler createCompiler() {
-        return new JavaCompiler();
+    protected Preprocessor createPreprocessor() {
+        return new JavaPreprocessor();
     }
 
     @Override
@@ -21,4 +21,9 @@ public class JavaCodeProcessor extends ProcessorTemplate {
         return true;
     }
 
+    @Override
+    public int getCyclomaticComplexity(String filePath) {
+        Preprocessor javaPreprocessor = createPreprocessor();
+        return javaPreprocessor.calculateClassCyclomaticComplexity(filePath);
+    }
 }

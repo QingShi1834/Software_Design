@@ -1,8 +1,7 @@
 package org.example.scoreCalculator.impl;
 
-import org.example.codeHandler.CodeHandlerFactory;
+import org.example.codeHandler.ProcessorTemplate;
 import org.example.codeHandler.impl.JavaCodeProcessor;
-import org.example.codeHandler.impl.JavaHandlerFactory;
 import org.example.entity.SampleItem;
 import org.example.scoreCalculator.ScoringStrategy;
 
@@ -13,7 +12,6 @@ public class ProgrammingScoringStrategy implements ScoringStrategy {
     private List<SampleItem> samples;
     private int timeLimit;
 
-    CodeHandlerFactory codeHandlerFactory;
 //    CodeHandlerAdapter codeHandlerAdapter;
     public ProgrammingScoringStrategy(int points,List<SampleItem> samples, int timeLimit){
         this.points = points;
@@ -37,6 +35,11 @@ public class ProgrammingScoringStrategy implements ScoringStrategy {
 
         return points;
     }
+
+//    public int calculateComplexity(String self_writtenAnswer){
+//        ProcessorTemplate processorTemplate = new JavaCodeProcessor();
+//        return processorTemplate.getCyclomaticComplexity(self_writtenAnswer);
+//    }
 
     // 获取文件的后缀名
     private static String getFileExtension(String filePath) {

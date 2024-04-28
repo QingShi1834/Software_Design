@@ -52,8 +52,11 @@ public class ThreadPool {
                         f.get(timeout, TimeUnit.MILLISECONDS);
                     } catch (CancellationException | ExecutionException ignore) {
                     } catch (TimeoutException e) {
-//                        throw new RuntimeException(e);
-                        f.cancel(true);
+                        for (int j = i; j < futures.size(); j++) {
+                            futures.get(j).cancel(true);
+                        }
+                        done = true;
+                        return futures;
                     }
                 }
             }

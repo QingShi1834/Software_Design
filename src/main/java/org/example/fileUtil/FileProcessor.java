@@ -1,6 +1,9 @@
 package org.example.fileUtil;
 
+import com.fasterxml.jackson.dataformat.csv.CsvMapper;
+import com.fasterxml.jackson.dataformat.csv.CsvSchema;
 import org.example.entity.Answer;
+import org.example.entity.Complexity;
 import org.example.entity.Exam;
 import org.example.entity.ExamScore;
 import org.example.fileUtil.impl.CSVScoreWriter;
@@ -102,5 +105,20 @@ public class FileProcessor {
 
         }
         return answers;
+    }
+
+    public void saveComplexityList(String outputPath, List<Complexity> complexityList) throws IOException{
+        if (complexityList.isEmpty()){
+            System.out.println("no need to save");
+            return;
+        }
+        // 创建 CsvMapper 对象
+        CsvMapper mapper = new CsvMapper();
+
+        // 创建 CsvSchema 对象
+        CsvSchema schema = mapper.schemaFor(Complexity.class).withHeader();
+//        System.out.println("正在写入csv文件： " + filePath);
+        // 写入 CSV 文件
+        mapper.writer(schema).writeValue(new File(outputPath), complexityList);
     }
 }

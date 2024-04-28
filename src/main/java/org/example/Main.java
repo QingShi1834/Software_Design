@@ -26,6 +26,7 @@ public class Main {
         // 将提交的回答放入oj判断，拿到成绩表
         OnlineJudge onlineJudge = new OnlineJudge(examsPath, answersPath, output);
         onlineJudge.run();
+//        onlineJudge.runComplexity();
     }
 
 

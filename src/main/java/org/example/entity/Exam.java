@@ -1,8 +1,5 @@
 package org.example.entity;
 
-
-import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlElementWrapper;
-import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
 import lombok.Data;
 import org.example.question.Question;
 

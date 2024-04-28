@@ -1,18 +1,16 @@
 package org.example.onlineJudge;
 
-import org.example.entity.Answer;
-import org.example.entity.AnswerItem;
-import org.example.entity.Exam;
-import org.example.entity.ExamScore;
+import org.example.codeHandler.ProcessorTemplate;
+import org.example.codeHandler.impl.JavaCodeProcessor;
+import org.example.entity.*;
 import org.example.fileUtil.FileProcessor;
 import org.example.fileUtil.impl.CSVScoreWriter;
+import org.example.question.ProgrammingQuestion;
 import org.example.question.Question;
 import org.example.threadPool.ThreadPool;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.Future;
 
 public class OnlineJudge {
@@ -20,6 +18,7 @@ public class OnlineJudge {
     private Map<Integer, Exam> idToExamMap;
 
     private List<ExamScore> examScoreList = new ArrayList<>();
+    private List<Complexity> codeComplexityList = new ArrayList<>();
 
     private FileProcessor fileProcessor;
 
@@ -36,7 +35,14 @@ public class OnlineJudge {
     public void run() throws IOException {
         init(examsPath,answersPath);
         calculateExamScoreList();
+        ThreadPool.getInstance().shutdown();
         saveScoreList(outPath);
+    }
+
+    public void runComplexity() throws IOException {
+        this.answerList = fileProcessor.readAnswer(answersPath);
+        calculateComplexityList();
+        saveComplexityList(outPath);
     }
 
     public void init(String examsPath, String answersPath ) throws IOException {
@@ -45,6 +51,7 @@ public class OnlineJudge {
         initQuestionScoreStrategy();
     }
 
+//    public void
     public List<ExamScore> calculateExamScoreList(){
         // 使用 Lambda 表达式
         answerList.forEach(item -> {
@@ -77,8 +84,10 @@ public class OnlineJudge {
         for (int i = 0; i < questionList.size(); i++) {
             Question question = questionList.get(i);
             String answer = answers.get(i).getAnswer();
-
             gradeOfPerQuestion = question.getScoringStrategy().calculateQuestionScore(answer);
+            if (question instanceof ProgrammingQuestion){
+
+            }
             totalScore += gradeOfPerQuestion;
         }
         return totalScore;
@@ -88,10 +97,32 @@ public class OnlineJudge {
         fileProcessor.saveExamScoreList(outputPath,examScoreList);
     }
 
+    public void saveComplexityList(String outputPath) throws IOException {
+        fileProcessor.saveComplexityList(outputPath,codeComplexityList);
+    }
+
     private  void initQuestionScoreStrategy(){
         for (Exam exam:idToExamMap.values()){
             exam.getQuestions().forEach(Question::initStrategy);
         }
+    }
+
+    private void calculateComplexityList(){
+        JavaCodeProcessor codeProcessor = new JavaCodeProcessor();
+        // 使用 Lambda 表达式
+        answerList.forEach(item -> {
+//            System.out.println(item.toString());
+            // 在这里对每个元素执行操作
+
+            item.getAnswers().forEach(answersItem -> {
+
+                if (answersItem.getId() == 3){
+                    Complexity codeComplexity =  new Complexity(item.getExamId(),item.getStudentId(),3,
+                            codeProcessor.getCyclomaticComplexity("src/test/resources/cases/answers/" + answersItem.getAnswer()));
+                    codeComplexityList.add(codeComplexity);
+                }
+            });
+        });
     }
 
 }

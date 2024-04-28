@@ -1,8 +1,6 @@
 package org.example.codeHandler;
-
 import org.example.entity.SampleItem;
-//import org.example.threadPool.ExecutionResult;
-//import org.example.threadPool.ExecutionStatus;
+
 import org.example.threadPool.ThreadPool;
 
 import java.util.List;
@@ -13,6 +11,20 @@ import java.util.stream.Collectors;
 
 public abstract class ProcessorTemplate {
     private ThreadPool threadPool = ThreadPool.getInstance();
+//    @Getter
+//    private int cyclomaticComplexity = -1;
+    // 工厂方法，由子类实现
+    protected abstract Preprocessor createPreprocessor();
+
+    // 抽象方法，由子类实现
+    public abstract int getCyclomaticComplexity(String filePath);
+
+    // 工厂方法，由子类实现
+    protected abstract Executor createExecutor();
+
+    // 抽象方法，由子类实现
+    protected abstract boolean isCompiledLanguage();
+
     // 模板方法，定义了处理代码的通用流程
     public final int handleCode(String filePath, int point, List<SampleItem> sampleList, int timeLimit) {
         String fileAbsolutePath = "src/test/resources/cases/answers/" + filePath;
@@ -29,11 +41,11 @@ public abstract class ProcessorTemplate {
         try {
             // 钩子函数
             if (isCompiledLanguage()){
+                Preprocessor preprocessor = createPreprocessor();
 
-                Compiler compiler = createCompiler();
-                String compiledFilePath =  compiler.getCompileDirectory() + fileName;
+                String compiledFilePath =  preprocessor.getCompileDirectory() + fileName;
                 // 创建编译任务
-                Future<Boolean> compileFuture = compileFileTask(compiler, fileAbsolutePath);
+                Future<Boolean> compileFuture = compileFileTask(preprocessor, fileAbsolutePath);
                 System.out.println(compiledFilePath);
                 // 创建执行任务列表
                 List<Callable<String>> executeTasks = sampleList.parallelStream()
@@ -49,6 +61,7 @@ public abstract class ProcessorTemplate {
                 List<Callable<String>> executeTasks = sampleList.parallelStream()
                         .map(sampleItem -> (Callable<String>) () -> executor.execute(fileAbsolutePath, sampleItem.getProgramArgs()))
                         .collect(Collectors.toList());
+
                 return executeTasks(executeTasks,point,timeLimit,outputList);
             }
 
@@ -62,19 +75,9 @@ public abstract class ProcessorTemplate {
 
     }
 
-
-    // 工厂方法，由子类实现
-    protected abstract Compiler createCompiler();
-
-    // 工厂方法，由子类实现
-    protected abstract Executor createExecutor();
-
-    // 抽象方法，由子类实现
-    protected abstract boolean isCompiledLanguage();
-
     // 具体方法，通用的编译文件流程
-    protected Future<Boolean> compileFileTask(Compiler compiler, String fileAbsolutePath) {
-        Callable<Boolean> compileTask = () -> compiler.compile(fileAbsolutePath);
+    protected Future<Boolean> compileFileTask(Preprocessor preprocessor, String fileAbsolutePath) {
+        Callable<Boolean> compileTask = () -> preprocessor.compile(fileAbsolutePath);
         return threadPool.submit(compileTask);
     }
 
