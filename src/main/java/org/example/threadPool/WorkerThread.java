@@ -1,6 +1,7 @@
 package org.example.threadPool;
 
 import java.util.Queue;
+import java.util.concurrent.CancellationException;
 
 class WorkerThread extends Thread {
     private final Queue<Runnable> taskQueue;
@@ -27,6 +28,8 @@ class WorkerThread extends Thread {
             }
             try {
                 task.run(); // Execute task
+            } catch (CancellationException e){
+                System.out.println("任务取消");
             } catch (RuntimeException e) {
                 System.out.println("Thread pool is interrupted due to an issue: " + e.getMessage());
             }

@@ -8,6 +8,7 @@ import org.example.fileUtil.ExamReaderFactory;
 import org.example.fileUtil.impl.CSVScoreWriter;
 import org.example.fileUtil.impl.JsonAnswerReader;
 import org.example.onlineJudge.OnlineJudge;
+import org.example.threadPool.ThreadPool;
 
 import java.io.File;
 import java.io.FilenameFilter;
@@ -26,7 +27,10 @@ public class Main {
         // 将提交的回答放入oj判断，拿到成绩表
         OnlineJudge onlineJudge = new OnlineJudge(examsPath, answersPath, output);
         onlineJudge.run();
+
     }
+
+
 
 
 }

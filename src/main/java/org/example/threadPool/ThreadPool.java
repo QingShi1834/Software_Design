@@ -49,11 +49,17 @@ public class ThreadPool {
                 Future<T> f = futures.get(i);
                 if (!f.isDone()) {
                     try {
-                        f.get(timeout, TimeUnit.MILLISECONDS);
+                        f.get(1000, TimeUnit.MILLISECONDS);
                     } catch (CancellationException | ExecutionException ignore) {
+
                     } catch (TimeoutException e) {
 //                        throw new RuntimeException(e);
-                        f.cancel(true);
+                        for (int j = i; j < futures.size(); j++) {
+                            futures.get(i).cancel(true);
+                        }
+                        done = true;
+                        return futures;
+//                        f.cancel(true);
                     }
                 }
             }
