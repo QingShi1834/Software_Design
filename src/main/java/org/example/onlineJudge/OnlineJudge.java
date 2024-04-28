@@ -33,10 +33,16 @@ public class OnlineJudge {
     }
 
     public void run() throws IOException {
-        init(examsPath,answersPath);
-        calculateExamScoreList();
-        ThreadPool.getInstance().shutdown();
-        saveScoreList(outPath);
+
+        if (outPath.endsWith("output.csv")){
+            init(examsPath,answersPath);
+            calculateExamScoreList();
+            ThreadPool.getInstance().shutdown();
+            saveScoreList(outPath);
+        }else {
+            runComplexity();
+        }
+
     }
 
     public void runComplexity() throws IOException {

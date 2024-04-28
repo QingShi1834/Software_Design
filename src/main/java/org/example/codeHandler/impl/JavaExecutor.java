@@ -13,6 +13,7 @@ public class JavaExecutor implements Executor {
     @Override
     public String execute(String compiledFilePath, String[] args) {
 //        System.out.println("执行中");
+        Process process = null;
         try {
             // 获取最后一个斜杠的索引位置
             int lastIndex = compiledFilePath.lastIndexOf("/");
@@ -34,12 +35,18 @@ public class JavaExecutor implements Executor {
             processBuilder.directory(new java.io.File(directoryPath));
 
             // 启动进程并等待其完成
-            Process process = processBuilder.start();
+            process = processBuilder.start();
 
             // 读取命令输出
             BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()));
             StringBuilder re = new StringBuilder();
             String line;
+
+            Thread.sleep(90);
+            if (!reader.ready()){
+                return "";
+            }
+
             while ((line = reader.readLine()) != null) {
                 re.append(line);
 //                System.out.println(line);
@@ -64,6 +71,10 @@ public class JavaExecutor implements Executor {
 //            e.printStackTrace();
 //            throw new RuntimeException("Execution failed");
             return "";
+        } finally {
+          if (process != null && process.isAlive()){
+              process.destroy();
+          }
         }
     }
 
