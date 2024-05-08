@@ -36,6 +36,7 @@ public class JavaPreprocessor implements Preprocessor {
             Process process = processBuilder.start();
 
             int exitCode = process.waitFor();
+            process.destroy();
             if ( exitCode == 0){
 //                System.out.println("编译成功");
                 return true;

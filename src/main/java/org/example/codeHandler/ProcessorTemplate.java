@@ -1,12 +1,10 @@
 package org.example.codeHandler;
 import org.example.entity.SampleItem;
-
 import org.example.threadPool.ThreadPool;
 
+import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.Callable;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Future;
+import java.util.concurrent.*;
 import java.util.stream.Collectors;
 
 public abstract class ProcessorTemplate {
@@ -41,11 +39,11 @@ public abstract class ProcessorTemplate {
         try {
             // 钩子函数
             if (isCompiledLanguage()){
-                Preprocessor preprocessor = createPreprocessor();
 
-                String compiledFilePath =  preprocessor.getCompileDirectory() + fileName;
+                Preprocessor compiler = createPreprocessor();
+                String compiledFilePath =  compiler.getCompileDirectory() + fileName;
                 // 创建编译任务
-                Future<Boolean> compileFuture = compileFileTask(preprocessor, fileAbsolutePath);
+                Future<Boolean> compileFuture = compileFileTask(compiler, fileAbsolutePath);
                 System.out.println(compiledFilePath);
                 // 创建执行任务列表
                 List<Callable<String>> executeTasks = sampleList.parallelStream()
@@ -61,7 +59,6 @@ public abstract class ProcessorTemplate {
                 List<Callable<String>> executeTasks = sampleList.parallelStream()
                         .map(sampleItem -> (Callable<String>) () -> executor.execute(fileAbsolutePath, sampleItem.getProgramArgs()))
                         .collect(Collectors.toList());
-
                 return executeTasks(executeTasks,point,timeLimit,outputList);
             }
 
@@ -82,7 +79,7 @@ public abstract class ProcessorTemplate {
     }
 
     // 具体方法，通用的执行样例流程
-    protected int executeTasks(List<Callable<String>> tasks, int point, int time_limit, List<String> outputList) throws InterruptedException, ExecutionException {
+    protected int executeTasks(List<Callable<String>> tasks, int point, int time_limit, List<String> outputList)  {
         // 执行任务并获取结果
         List<Future<String>> re = threadPool.invokeAll(tasks,time_limit);
         int len = re.size();
@@ -91,8 +88,14 @@ public abstract class ProcessorTemplate {
             if (future.isCancelled()){
                 return 0;
             }
-            if (! future.get().equals(outputList.get(i))){
-                return 0;
+            try {
+                if (! future.get().equals(outputList.get(i))){
+                    return 0;
+                }
+            } catch (InterruptedException e) {
+                throw new RuntimeException(e);
+            } catch (ExecutionException e) {
+                throw new RuntimeException(e);
             }
         }
 

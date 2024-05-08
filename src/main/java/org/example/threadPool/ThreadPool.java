@@ -8,7 +8,7 @@ public class ThreadPool {
 
     private static final ThreadPool instance = new ThreadPool(threadNum);
     private final WorkerThread[] threads;
-    private final Queue<Runnable> taskQueue;
+    private final Queue<FutureTask> taskQueue;
 
     // 对外提供静态方法获取该对象
     public static ThreadPool getInstance() {
@@ -34,8 +34,7 @@ public class ThreadPool {
         return futureTask;
     }
 
-    public <T> List<Future<T>> invokeAll(Collection<? extends Callable<T>> tasks, int timeout)
-            throws InterruptedException {
+    public <T> List<Future<T>> invokeAll(Collection<? extends Callable<T>> tasks, int timeout) {
         if (tasks == null)
             throw new NullPointerException();
         ArrayList<Future<T>> futures = new ArrayList<>(tasks.size());
@@ -49,14 +48,13 @@ public class ThreadPool {
                 Future<T> f = futures.get(i);
                 if (!f.isDone()) {
                     try {
-                        f.get(timeout, TimeUnit.MILLISECONDS);
+                        f.get();
                     } catch (CancellationException | ExecutionException ignore) {
-                    } catch (TimeoutException e) {
-                        for (int j = i; j < futures.size(); j++) {
-                            futures.get(j).cancel(true);
-                        }
-                        done = true;
+                        taskQueue.clear();
+//                        f.cancel(true);
                         return futures;
+                    } catch (InterruptedException e) {
+                        throw new RuntimeException(e);
                     }
                 }
             }

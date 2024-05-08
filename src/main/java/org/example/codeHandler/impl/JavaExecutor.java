@@ -39,14 +39,11 @@ public class JavaExecutor implements Executor {
 
             // 读取命令输出
             BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()));
+            while (!reader.ready()){
+                Thread.sleep(10);
+            }
             StringBuilder re = new StringBuilder();
             String line;
-
-            Thread.sleep(90);
-            if (!reader.ready()){
-                return "";
-            }
-
             while ((line = reader.readLine()) != null) {
                 re.append(line);
 //                System.out.println(line);
@@ -58,23 +55,23 @@ public class JavaExecutor implements Executor {
 //                System.err.println(line);
 //            }
 
-            int exitCode = process.waitFor();
+//            int exitCode = process.waitFor();
 //            System.out.println("执行结果exitCode: " + exitCode);
 
             // 如果exitCode不为0，则抛出异常
-            if (exitCode != 0) {
-                throw new RuntimeException("Execution failed with exit code: " + exitCode);
-            }
+//            if (exitCode != 0) {
+//                throw new RuntimeException("Execution failed with exit code: " + exitCode);
+//            }
             // 返回编译结果
             return re.toString();
-        } catch (IOException | InterruptedException e) {
+        } catch (Exception e) {
 //            e.printStackTrace();
 //            throw new RuntimeException("Execution failed");
             return "";
-        } finally {
-          if (process != null && process.isAlive()){
-              process.destroy();
-          }
+        }finally {
+            if (process!=null){
+                process.destroy();
+            }
         }
     }
 

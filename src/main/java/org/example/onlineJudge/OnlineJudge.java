@@ -1,17 +1,14 @@
 package org.example.onlineJudge;
 
-import org.example.codeHandler.ProcessorTemplate;
 import org.example.codeHandler.impl.JavaCodeProcessor;
 import org.example.entity.*;
 import org.example.fileUtil.FileProcessor;
-import org.example.fileUtil.impl.CSVScoreWriter;
 import org.example.question.ProgrammingQuestion;
 import org.example.question.Question;
 import org.example.threadPool.ThreadPool;
 
 import java.io.IOException;
 import java.util.*;
-import java.util.concurrent.Future;
 
 public class OnlineJudge {
     private List<Answer> answerList;
@@ -33,15 +30,18 @@ public class OnlineJudge {
     }
 
     public void run() throws IOException {
-
-        if (outPath.endsWith("output.csv")){
-            init(examsPath,answersPath);
-            calculateExamScoreList();
-            ThreadPool.getInstance().shutdown();
-            saveScoreList(outPath);
-        }else {
-            runComplexity();
+        try{
+            if (outPath.endsWith("output.csv")){
+                init(examsPath,answersPath);
+                calculateExamScoreList();
+                saveScoreList(outPath);
+            }else {
+                runComplexity();
+            }
+        }finally {
+//            ThreadPool.getInstance().shutdown();
         }
+
 
     }
 
