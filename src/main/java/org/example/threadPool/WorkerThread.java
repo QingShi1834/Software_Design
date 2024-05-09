@@ -1,18 +1,17 @@
 package org.example.threadPool;
 
 import java.util.Queue;
-import java.util.Timer;
-import java.util.TimerTask;
+import java.util.concurrent.Executors;
 import java.util.concurrent.FutureTask;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 class WorkerThread extends Thread {
     private final Queue<FutureTask> taskQueue;
     private volatile boolean running = true;
-    private static Timer timer = new Timer(true);
-
+    private static ScheduledExecutorService Timer = Executors.newScheduledThreadPool(1);
     public WorkerThread(Queue<FutureTask> taskQueue) {
         this.taskQueue = taskQueue;
-//        setDaemon(true);
     }
 
     @Override
@@ -24,20 +23,20 @@ class WorkerThread extends Thread {
                     try {
                         taskQueue.wait(); // Wait for task
                     } catch (InterruptedException e) {
-//                        Thread.currentThread().interrupt();
-                        return;
+//                        e.printStackTrace();
+//                        return;
                     }
                 }
                 task = taskQueue.poll();//从队列中取出并移除队首的元素
             }
-            timer.schedule(new TimerTask() {
-                @Override
-                public void run() {
-                    if (!task.isDone()){
+            if (task instanceof TimeoutFutureTask) {
+                long timeout = ((TimeoutFutureTask<?>) task).getTimeoutMillis();
+                Timer.schedule(() -> {
+                    if (!task.isDone()) {
                         task.cancel(true);
                     }
-                }
-            },1000);
+                }, timeout, TimeUnit.MILLISECONDS);
+            }
             try {
                 task.run(); // Execute task
             } catch (RuntimeException e) {

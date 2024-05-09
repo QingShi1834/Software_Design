@@ -1,14 +1,10 @@
-package org.example.fileUtil;
+package org.example.question.multiplechoice;
 
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.JsonDeserializer;
 import com.fasterxml.jackson.databind.JsonNode;
-import org.example.question.multiplechoice.MultipleChoiceQuestion;
-import org.example.question.multiplechoice.MultipleChoiceQuestionFix;
-import org.example.question.multiplechoice.MultipleChoiceQuestionNothing;
-import org.example.question.multiplechoice.MultipleChoiceQuestionPartial;
 
 import java.io.IOException;
 

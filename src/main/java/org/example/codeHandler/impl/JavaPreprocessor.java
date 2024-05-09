@@ -15,7 +15,6 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 
-//import com.github.
 public class JavaPreprocessor implements Preprocessor {
 
     private final String compileDirectory = "src/test/resources/cases/answers/bin/";
@@ -45,7 +44,7 @@ public class JavaPreprocessor implements Preprocessor {
             // 返回编译结果
             return false;
         } catch (IOException | InterruptedException e) {
-            e.printStackTrace();
+//            e.printStackTrace();
             return false; // 返回 -1 表示编译过程中出现异常
         }
     }

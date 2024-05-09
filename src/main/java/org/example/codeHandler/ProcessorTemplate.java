@@ -35,7 +35,6 @@ public abstract class ProcessorTemplate {
                 .map(SampleItem::getOutput)
                 .collect(Collectors.toList());
 
-        System.out.println(fileName);
         try {
             // 钩子函数
             if (isCompiledLanguage()){
@@ -81,24 +80,28 @@ public abstract class ProcessorTemplate {
     // 具体方法，通用的执行样例流程
     protected int executeTasks(List<Callable<String>> tasks, int point, int time_limit, List<String> outputList)  {
         // 执行任务并获取结果
-        List<Future<String>> re = threadPool.invokeAll(tasks,time_limit);
-        int len = re.size();
-        for (int i = 0; i < len; i++) {
-            Future<String> future = re.get(i);
-            if (future.isCancelled()){
-                return 0;
-            }
-            try {
-                if (! future.get().equals(outputList.get(i))){
-                    return 0;
-                }
-            } catch (InterruptedException e) {
-                throw new RuntimeException(e);
-            } catch (ExecutionException e) {
-                throw new RuntimeException(e);
-            }
-        }
+        boolean re = threadPool.invokeAll(tasks,time_limit,outputList);
+        return re?point:0;
 
-        return point;
+        // 为什么要有下面这种写法 因为可能需要根据部分partial给分的原则 具体实现交给子类实现好了
+//        List<Future<String>> re = threadPool.invokeAll(tasks,time_limit);
+//        int len = re.size();
+//        for (int i = 0; i < len; i++) {
+//            Future<String> future = re.get(i);
+//            if (future.isCancelled()){
+//                return 0;
+//            }
+//            try {
+//                if (! future.get().equals(outputList.get(i))){
+//                    return 0;
+//                }
+//            } catch (InterruptedException e) {
+//                throw new RuntimeException(e);
+//            } catch (ExecutionException e) {
+//                throw new RuntimeException(e);
+//            }
+//        }
+//
+//        return point;
     }
 }

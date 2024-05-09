@@ -1,18 +1,8 @@
 package org.example;
 
-import org.example.entity.Answer;
-import org.example.entity.Exam;
-import org.example.entity.ExamScore;
-import org.example.fileUtil.ExamReader;
-import org.example.fileUtil.ExamReaderFactory;
-import org.example.fileUtil.impl.CSVScoreWriter;
-import org.example.fileUtil.impl.JsonAnswerReader;
 import org.example.onlineJudge.OnlineJudge;
 
-import java.io.File;
-import java.io.FilenameFilter;
 import java.io.IOException;
-import java.util.*;
 
 public class Main {
     public static void main(String[] args) throws IOException {
@@ -26,7 +16,6 @@ public class Main {
         // 将提交的回答放入oj判断，拿到成绩表
         OnlineJudge onlineJudge = new OnlineJudge(examsPath, answersPath, output);
         onlineJudge.run();
-//        onlineJudge.runComplexity();
     }
 
 

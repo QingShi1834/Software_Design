@@ -39,8 +39,13 @@ public class JavaExecutor implements Executor {
 
             // 读取命令输出
             BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()));
+            // 读取错误输出
+            BufferedReader errorReader = new BufferedReader(new InputStreamReader(process.getErrorStream()));
             while (!reader.ready()){
-                Thread.sleep(10);
+                if (errorReader.ready()){
+                    return "";
+                }
+                Thread.sleep(2);
             }
             StringBuilder re = new StringBuilder();
             String line;
@@ -49,8 +54,7 @@ public class JavaExecutor implements Executor {
 //                System.out.println(line);
             }
 
-            // 读取错误输出
-//            BufferedReader errorReader = new BufferedReader(new InputStreamReader(process.getErrorStream()));
+
 //            while ((line = errorReader.readLine()) != null) {
 //                System.err.println(line);
 //            }
@@ -75,9 +79,4 @@ public class JavaExecutor implements Executor {
         }
     }
 
-    public static void main(String[] args) throws IOException, InterruptedException {
-        JavaExecutor javaExecutor = new JavaExecutor();
-        String[] temp = {"1","3"};
-        javaExecutor.execute("src/test/resources/cases/answers/bin/Solution11", temp );
-    }
 }

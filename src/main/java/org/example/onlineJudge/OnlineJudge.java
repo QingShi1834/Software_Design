@@ -91,9 +91,6 @@ public class OnlineJudge {
             Question question = questionList.get(i);
             String answer = answers.get(i).getAnswer();
             gradeOfPerQuestion = question.getScoringStrategy().calculateQuestionScore(answer);
-            if (question instanceof ProgrammingQuestion){
-
-            }
             totalScore += gradeOfPerQuestion;
         }
         return totalScore;
@@ -116,7 +113,7 @@ public class OnlineJudge {
     private void calculateComplexityList(){
         JavaCodeProcessor codeProcessor = new JavaCodeProcessor();
         // 使用 Lambda 表达式
-        answerList.forEach(item -> {
+        answerList.parallelStream().forEach(item -> {
 //            System.out.println(item.toString());
             // 在这里对每个元素执行操作
 

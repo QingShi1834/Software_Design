@@ -34,6 +34,24 @@ public class ThreadPool {
         return futureTask;
     }
 
+    /**
+     *
+     * @param task  Callable<T>
+     * @param timeout 单位为毫秒
+     * @return Future<T>
+     * @param <T>
+     */
+    public <T> Future<T> submit(Callable<T> task, int timeout) {
+//        FutureTask<T> futureTask = new FutureTask<>(task);
+        TimeoutFutureTask<T> futureTask = new TimeoutFutureTask<>(task, timeout);
+        synchronized (taskQueue) {
+            taskQueue.add(futureTask);
+            taskQueue.notify();
+        }
+        return futureTask;
+    }
+
+
     public <T> List<Future<T>> invokeAll(Collection<? extends Callable<T>> tasks, int timeout) {
         if (tasks == null)
             throw new NullPointerException();
@@ -41,19 +59,23 @@ public class ThreadPool {
         boolean done = false;
         try {
             for (Callable<T> t : tasks) {
-                Future<T> f = submit(t);
-                futures.add(f);
+                futures.add(submit(t,timeout));
             }
             for (int i = 0, size = futures.size(); i < size; i++) {
                 Future<T> f = futures.get(i);
                 if (!f.isDone()) {
                     try {
                         f.get();
-                    } catch (CancellationException | ExecutionException ignore) {
+                    } catch (CancellationException e) {
                         taskQueue.clear();
-//                        f.cancel(true);
+                        done = true;
                         return futures;
-                    } catch (InterruptedException e) {
+                    } catch (ExecutionException ignore){
+                        taskQueue.clear();
+                        f.cancel(true);
+                        done = true;
+                        return futures;
+                    }catch (InterruptedException e) {
                         throw new RuntimeException(e);
                     }
                 }
@@ -62,10 +84,71 @@ public class ThreadPool {
             return futures;
         } finally {
             if (!done)
-                for (int i = 0, size = futures.size(); i < size; i++)
-                    futures.get(i).cancel(true);
+                for (Future<T> future : futures) future.cancel(true);
         }
     }
+
+    public <T> boolean invokeAll(Collection<? extends Callable<T>> tasks, int timeout, List<String> outputList) {
+        if (tasks == null)
+            throw new NullPointerException();
+        ArrayList<Future<T>> futures = new ArrayList<>(tasks.size());
+        boolean done = false;
+        try {
+            for (Callable<T> t : tasks) {
+                futures.add(submit(t,timeout));
+            }
+            for (int i = 0, size = futures.size(); i < size; i++) {
+                Future<T> f = futures.get(i);
+
+                try {
+                    String re = (String) f.get();
+                    if (!re.equals(outputList.get(i))){
+                        return false;
+                    }
+                } catch (CancellationException e) {
+                    return false;
+                } catch (ExecutionException ignore){
+                    return false;
+                }catch (InterruptedException e) {
+                    throw new RuntimeException(e);
+                }
+
+            }
+            done = true;
+            return true;
+        } finally {
+            if (!done)
+                for (Future<T> future : futures) future.cancel(true);
+        }
+    }
+//    // Define Pair class
+//    static class ExecutionResult {
+//        @Getter
+//        private final ExecutionStatus status;
+//        private final List<Future> value;
+//
+//        public ExecutionResult() {
+//            status = ExecutionStatus.WAITING;
+//            value = new ArrayList<>();
+//        }
+//
+//        public ExecutionResult(ExecutionStatus status, List<Future> value) {
+//            this.status = status;
+//            this.value = value;
+//        }
+//
+//        public List<Future> getValue() {
+//            return value;
+//        }
+//
+//        public boolean isSuccess() {
+//            return status.equals(ExecutionStatus.SUCCESSFUL);
+//        }
+//
+//        public void addTaskFuture(Future<?> future) {
+//            value.add(future);
+//        }
+//    }
 
     public void shutdown() {
         for (WorkerThread thread : threads) {

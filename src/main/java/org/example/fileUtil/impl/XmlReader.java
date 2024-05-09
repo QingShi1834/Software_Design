@@ -2,22 +2,26 @@ package org.example.fileUtil.impl;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.module.SimpleModule;
-//import com.sun.org.apache.xml.internal.serialize.XMLSerializer;
-
 import net.sf.json.xml.XMLSerializer;
 import org.example.entity.Exam;
-import org.example.fileUtil.ExamReader;
-import org.example.fileUtil.MultipleChoiceQuestionDeserializer;
+import org.example.question.multiplechoice.MultipleChoiceQuestionDeserializer;
+import org.example.fileUtil.Reader;
 import org.example.question.multiplechoice.MultipleChoiceQuestion;
 
+import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 
-
-public class XmlExamReader implements ExamReader {
+public class XmlReader implements Reader<Exam> {
     @Override
-    public Exam readExam(String filePath) {
+    public Exam read(File file) throws IOException {
+        return null;
+    }
+
+    @Override
+    public Exam read(String filePath) throws IOException {
+//        return null;
         try {
 
             // 读取 XML 文件内容并转换为字符串
