@@ -1,7 +1,7 @@
 package org.example.scoreCalculator.impl;
 
+import org.example.codeHandler.ProcessorFactory;
 import org.example.codeHandler.ProcessorTemplate;
-import org.example.codeHandler.impl.JavaCodeProcessor;
 import org.example.entity.SampleItem;
 import org.example.scoreCalculator.ScoringStrategy;
 
@@ -27,19 +27,10 @@ public class ProgrammingScoringStrategy implements ScoringStrategy {
 //        String answer_path = "src/test/resources/cases/answers/" + (String)self_writtenAnswer;
         String answer_path = (String)self_writtenAnswer;
 
-        switch (getFileExtension((String)self_writtenAnswer)){
-            case "java":
-                return new JavaCodeProcessor().handleCode(answer_path,points,samples,timeLimit);
-            default:break;
-        }
+        ProcessorTemplate processor = ProcessorFactory.getProcessor(getFileExtension((String)self_writtenAnswer));
+        return processor.handleCode(answer_path,points,samples,timeLimit);
 
-        return points;
     }
-
-//    public int calculateComplexity(String self_writtenAnswer){
-//        ProcessorTemplate processorTemplate = new JavaCodeProcessor();
-//        return processorTemplate.getCyclomaticComplexity(self_writtenAnswer);
-//    }
 
     // 获取文件的后缀名
     private static String getFileExtension(String filePath) {

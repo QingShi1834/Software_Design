@@ -3,9 +3,8 @@ package org.example.onlineJudge;
 import org.example.codeHandler.impl.JavaCodeProcessor;
 import org.example.entity.*;
 import org.example.fileUtil.FileProcessor;
-import org.example.question.ProgrammingQuestion;
+import org.example.fileUtil.impl.FileProcessorImpl;
 import org.example.question.Question;
-import org.example.threadPool.ThreadPool;
 
 import java.io.IOException;
 import java.util.*;
@@ -22,8 +21,9 @@ public class OnlineJudge {
     private String examsPath;
     private String answersPath;
     private String outPath;
+
     public OnlineJudge(String examsPath, String answersPath, String outPath) {
-        this.fileProcessor = new FileProcessor();
+        this.fileProcessor = new FileProcessorImpl();
         this.examsPath = examsPath;
         this.answersPath = answersPath;
         this.outPath = outPath;
@@ -113,7 +113,7 @@ public class OnlineJudge {
     private void calculateComplexityList(){
         JavaCodeProcessor codeProcessor = new JavaCodeProcessor();
         // 使用 Lambda 表达式
-        answerList.parallelStream().forEach(item -> {
+        answerList.forEach(item -> {
 //            System.out.println(item.toString());
             // 在这里对每个元素执行操作
 

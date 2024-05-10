@@ -175,125 +175,128 @@ class SampleItem {
     + toString(): String
 }
 
-interface ScoreWriter {
-    + writeScore(filePath: String) throws IOException
+class Complexity {
+    - examId: int
+    - stuId: int
+    - qId: int
+    - complexity: int
+    + Complexity(examId: int, stuId: int, qId: int, complexity: int)
+    + toString(): String
 }
 
-interface ExamReader {
-    + readExam(filePath: String): Exam throws IOException
+interface Reader<T> {
+    + read(filePath: String): T throws IOException
+    + read(file: File): T throws IOException
 }
 
-interface AnswerReader {
-    + readAnswer(filePath: String): Answer throws IOException
-    + readAnswer(jsonFile: File): Answer throws IOException
+class JsonReader<T> implements Reader<T>{
+    - valueType: Class<T>
+    - mapper: ObjectMapper
+    + JsonReader(valueType: Class<T>)
+    + addDeserializer(targetType: Class<D>, customDeserializer: JsonDeserializer<? extends D>): void
+    + read(filePath: String): T throws IOException
+    + read(file: File): T throws IOException
 }
 
-class FileProcessor {
-    - examReaderFactory: ExamReaderFactory
-    - scoreWriter: ScoreWriter
-    - answerReader: AnswerReader
+class XmlReader implements Reader<T>{
+    + read(file: File): Exam throws IOException
+    + read(filePath: String): Exam throws IOException
+}
 
-    + readExam(examsPath: String): Map<Integer, Exam> throws IOException
-    + saveExamScoreList(outputPath: String, scoreList: List<ExamScore>) throws IOException
+interface Writer<T> {
+    + write(filePath: String, content: T): void throws IOException
+}
+
+class CSVWriter<T> implements Writer<T>{
+    + write(filePath: String, content: Object): void throws IOException
+}
+class FileReaderFactory {
+    + createFileReader(fileType: String, type: Class<T>): Reader<T>
+}
+
+interface FileProcessor {
     + readAnswer(answersPath: String): List<Answer> throws IOException
+    + readExam(examsPath: String): Map<Integer, Exam> throws IOException
+    + saveExamScoreList(outputPath: String, scoreList: List<ExamScore>): void throws IOException
+    + saveComplexityList(outputPath: String, complexityList: List<Complexity>): void throws IOException
 }
 
-class ExamReaderFactory {
-    + createExamReader(fileExtension: String): ExamReader
+class FileProcessorImpl implements FileProcessor{
+    + readExam(examsPath: String): Map<Integer, Exam> throws IOException
+    + saveExamScoreList(outputPath: String, scoreList: List<ExamScore>): void throws IOException
+    + readAnswer(answersPath: String): List<Answer> throws IOException
+    + saveComplexityList(outputPath: String, complexityList: List<Complexity>): void throws IOException
 }
-
-class CSVScoreWriter implements ScoreWriter{
-    - examScoreList: List<ExamScore>
-
-    + CSVScoreWriter(examScoreList: List<ExamScore>)
-    + writeScore(filePath: String) throws IOException
+class ProcessorFactory {
+    + getProcessor(codeType: String): ProcessorTemplate
 }
-
-class JsonAnswerReader implements AnswerReader{
-    + readAnswer(filePath: String): Answer throws IOException
-    + readAnswer(jsonFile: File): Answer throws IOException
-}
-
-class JsonExamReader implements ExamReader{
-    + readExam(filePath: String): Exam throws IOException
-    + readExamByJson(json: String): Exam throws IOException
-}
-
-class XmlExamReader implements ExamReader{
-    + readExam(filePath: String): Exam
-    + readExamByJson(json: String): Exam throws IOException
+class ProcessorTemplate {
+        - threadPool: ThreadPool
+        + createPreprocessor(): Preprocessor
+        + getCyclomaticComplexity(filePath: String): int
+        + createExecutor(): Executor
+        + isCompiledLanguage(): boolean
+        + handleCode(filePath: String, point: int, sampleList: List<SampleItem>, timeLimit: int): int
+        - compileFileTask(preprocessor: Preprocessor, fileAbsolutePath: String): Future<Boolean>
+        - executeTasks(tasks: List<Callable<String>>, point: int, time_limit: int, outputList: List<String>): int
 }
 
 interface Executor {
     + execute(compiledFilePath: String, args: String[]): String
 }
 
-interface Compiler {
+interface Preprocessor {
     + compile(filePath: String): boolean
     + getCompileDirectory(): String
+    + calculateMethodCyclomaticComplexity(methodCode: Node): int
+    + calculateClassCyclomaticComplexity(filePath: String): int
 }
 
-interface CodeHandlerFactory {
-    + createCompiler(): Compiler
-    + createExecutor(): Executor
-    + handleCode(filePath: String, point: int, sampleList: List<SampleItem>, timeLimit: int): int
-}
-
-
-class JavaCompiler implements Compiler{
+class JavaPreprocessor implements Preprocessor{
     - compileDirectory: String
-
-    + JavaCompiler()
     + getCompileDirectory(): String
     + compile(filePath: String): boolean
+    + calculateMethodCyclomaticComplexity(method: Node): int
+    + calculateClassCyclomaticComplexity(filePath: String): int
 }
 
 class JavaExecutor implements Executor{
     + execute(compiledFilePath: String, args: String[]): String
 }
 
-class JavaHandlerFactory implements CodeHandlerFactory{
-    + createCompiler(): Compiler
+class JavaCodeProcessor implements ProcessorTemplate{
+    + createPreprocessor(): Preprocessor
     + createExecutor(): Executor
-    + handleCode(filePath: String, point: int, sampleList: List<SampleItem>, timeLimit: int): int
+    + isCompiledLanguage(): boolean
+    + getCyclomaticComplexity(filePath: String): int
 }
-
 
 OnlineJudge --> Answer
 OnlineJudge --> Exam
 OnlineJudge --> ExamScore
 OnlineJudge --> FileProcessor
-OnlineJudge --> ThreadPool
+OnlineJudge --> Complexity
 
-FileProcessor --> ExamReaderFactory
-FileProcessor --> ScoreWriter
-FileProcessor --> AnswerReader
+FileProcessorImpl --> Writer
+FileProcessorImpl --> FileReaderFactory
 
 Question --> ScoringStrategy
 
 ProgrammingQuestion "1" --> "n" SampleItem : contains
-ProgrammingScoringStrategy --> CodeHandlerFactory
+ProgrammingScoringStrategy --> ProcessorFactory
 
+ProcessorFactory --> ProcessorTemplate
 
+FileReaderFactory --> Reader
 
-ThreadPool "1" --> "*" WorkerThread
+ThreadPool "1" --> "*" WorkerThread : contains
 
-Answer --> AnswerItem
+Answer "1"-->"*" AnswerItem : contains
 
 Exam --> Question
 
-
-ExamReaderFactory --> ExamReader
-
-CSVScoreWriter --> ExamScore
-
-JsonAnswerReader --> Answer
-
-JsonExamReader --> Exam
-
-Executor <-- CodeHandlerFactory
-Compiler <-- CodeHandlerFactory
-
-
+ProcessorTemplate --> ThreadPool
+ProcessorTemplate --> Preprocessor
+ProcessorTemplate --> Executor
 
 @enduml
